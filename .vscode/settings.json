@@ -1,5 +1,9 @@
 {
     "files.associations": {
-        "xstring": "cpp"
+        "xstring": "cpp",
+        "vector": "cpp",
+        "system_error": "cpp",
+        "xlocale": "cpp",
+        "regex": "cpp"
     }
 }
