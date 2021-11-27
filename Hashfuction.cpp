@@ -1,42 +1,48 @@
-#include<iostream>
-#include"main.h"
+#include <iostream>
+#include "main.h"
 using namespace std;
 
 class Contain
 {
-    public:
+public:
     string Identifier;
     string TypeIn[20];
     string TypeOut;
     string Value;
     int nTypeIn;
 
-    Contain():Identifier("") , TypeOut(""), Value(""),nTypeIn(0) {}
-    
+    Contain() : Identifier(""), TypeOut(""), Value(""), nTypeIn(0) {}
+
     friend class Symbol;
 
-    void AddContain(string identifier,int nTypeIn, string typeout, string value)
+    void AddContain(string identifier, int nTypeIn, string typeout, string value)
     {
         this->Identifier = identifier;
         this->TypeOut = typeout;
         this->Value = value;
-        for(auto &x: TypeIn){ x = "Undefined";};
+        for (auto &x : TypeIn)
+        {
+            x = "Undefined";
+        };
         this->nTypeIn = nTypeIn;
     }
 };
 
 class Symbol
 {
-    public:
+public:
     Contain contain;
     int level_of_block;
     int key;
 
-    Symbol(): level_of_block(0), key(0){};
+    Symbol() : level_of_block(0), key(0){};
     Symbol(string name, int nTypeIn = 0)
     {
         this->contain.Identifier = name;
-        for(auto &x : this->contain.TypeIn){ x = "Undefined";}
+        for (auto &x : this->contain.TypeIn)
+        {
+            x = "Undefined";
+        }
         this->level_of_block = 0;
         this->key = HASH_NAME(this);
         this->contain.nTypeIn = nTypeIn;
@@ -46,7 +52,6 @@ class Symbol
         this->contain.Identifier = name;
         this->key = key;
         this->level_of_block;
-        
     }
     ~Symbol(){};
 
@@ -56,7 +61,7 @@ class Symbol
     {
         string Res = "";
         Res += to_string(Name->level_of_block);
-        for(int i = 0; i< Name->contain.Identifier.length(); i++)
+        for (int i = 0; i < Name->contain.Identifier.length(); i++)
         {
             Res += to_string(Name->contain.Identifier[i] - 48);
         }
@@ -76,56 +81,55 @@ class Symbol
         return this->key;
     }
 
-    bool operator == (Symbol &Sec)
+    bool operator==(Symbol &Sec)
     {
-        if(this->key == Sec.key) return true;
+        if (this->key == Sec.key)
+            return true;
         return false;
     }
-    
 };
 
 class HashTable
 {
-    public:
-    Symbol* arr;
+public:
+    Symbol *arr;
     int Size_of_HashTable;
     int c, c2;
 
-    HashTable():Size_of_HashTable(0), c(0), c2(0){}
+    HashTable() : Size_of_HashTable(0), c(0), c2(0) {}
 
     bool CheckStringNum(string value)
     {
         char *end;
-        strtol( value.c_str(), &end, 10 );
-        if ( *end == '\0' )
+        strtol(value.c_str(), &end, 10);
+        if (*end == '\0')
         {
-        return true;
+            return true;
         }
         else
         {
-        return false;   
+            return false;
         }
     }
-    
+
     int CheckTypeOfAssign(string &name)
     {
-        int a = name.find('(') , b = name.find(')');
-        if(a != -1)
+        int a = name.find('('), b = name.find(')');
+        if (a != -1)
         {
             // sum(5,x) undefined
             // foo(’abc’) define
-            Symbol* SymbolNeedAssign;
+            Symbol *SymbolNeedAssign;
             SymbolNeedAssign = FindSymbol(name.substr(0, a));
 
-            if(SymbolNeedAssign->contain.TypeIn[0] == "Undefined")
+            if (SymbolNeedAssign->contain.TypeIn[0] == "Undefined")
             {
-                //Undefined
+                // Undefined
                 return 2;
-                
             }
             else
             {
-                //Already check if input is true
+                // Already check if input is true
                 return 3;
             }
         }
@@ -133,13 +137,13 @@ class HashTable
         {
             // 'abcd'
             // 1234
-            if(CheckStringNum(name))
+            if (CheckStringNum(name))
             {
                 return 0;
             }
             else
             {
-                if(name.find('\'')== -1)
+                if (name.find('\'') == -1)
                 {
                     return 4;
                 }
@@ -151,62 +155,59 @@ class HashTable
 
     void ASSIGN(string name, string value)
     {
-        Symbol* SymbolNeedAssign;
+        Symbol *SymbolNeedAssign;
         SymbolNeedAssign = FindSymbol(name);
-        
 
-        //0 is Assign number ASSIGN x 3
-        //1 is Assign string '' ASSIGN x 'ed'
-        //2 is Assign Function haven't type yet ASSIGN x Fun(12,x, 'alo')
-        //3 is Assign Fuction have type ASSIGN x Fun(12,x, 'alo') 
-        //4 is Assign Variable has it value x = a (a = 5)
+        // 0 is Assign number ASSIGN x 3
+        // 1 is Assign string '' ASSIGN x 'ed'
+        // 2 is Assign Function haven't type yet ASSIGN x Fun(12,x, 'alo')
+        // 3 is Assign Fuction have type ASSIGN x Fun(12,x, 'alo')
+        // 4 is Assign Variable has it value x = a (a = 5)
         int typeAssign = CheckTypeOfAssign(value);
         switch (typeAssign)
         {
         case 0:
-            {
-                //x(maybe) = 2
-                SymbolNeedAssign->contain.TypeOut = "Number";
-                SymbolNeedAssign->contain.Value = value;
-            }
-            break;
+        {
+            // x(maybe) = 2
+            SymbolNeedAssign->contain.TypeOut = "Number";
+            SymbolNeedAssign->contain.Value = value;
+        }
+        break;
         case 1:
-            {
-                //x(maybe) = 'abc' (but a is int??)
-                SymbolNeedAssign->contain.TypeOut ="String";
-                SymbolNeedAssign->contain.Value = value;
-            }
-            break;
+        {
+            // x(maybe) = 'abc' (but a is int??)
+            SymbolNeedAssign->contain.TypeOut = "String";
+            SymbolNeedAssign->contain.Value = value;
+        }
+        break;
         case 2:
+        {
+            Symbol *SymbolNeedAssign2; // fun
+            SymbolNeedAssign2 = FindSymbol(value.substr(0, value.find('(')));
+            // Assign x(type = a) = a;
+            AssignTypeOut(SymbolNeedAssign, SymbolNeedAssign2);
+
+            // Check fun(1,2,3)
+            value.erase(0, value.find('(') + 1); // 1,a,'b')
+
+            int n = CharCount(value, ',') + 1; // 2
+            // check cut each slot 1,a,'b') to store in array
+            for (int i = 0; i < n; i++)
             {
-                Symbol* SymbolNeedAssign2; // fun
-                SymbolNeedAssign2 = FindSymbol(value.substr(0, value.find('(')));
-                //Assign x(type = a) = a;
-                AssignTypeOut(SymbolNeedAssign, SymbolNeedAssign2);
-                
-                //Check fun(1,2,3)
-                value.erase(0,value.find('(') + 1); // 1,a,'b')
-                
-                int n = CharCount(value, ',') + 1; // 2
-                //check cut each slot 1,a,'b') to store in array
-                for(int i = 0; i<n; i++)
-                {
-                    string cutslot = value.substr(0,value.find(',')); //1
-                    value.erase(0,value.find(',') + 1);
-                    int Type = CheckTypeOfAssign(cutslot);
-                    //check each slot is what type??
-                    AssignTypeIn(SymbolNeedAssign2, Type, i, cutslot);
-                }
-                
+                string cutslot = value.substr(0, value.find(',')); // 1
+                value.erase(0, value.find(',') + 1);
+                int Type = CheckTypeOfAssign(cutslot);
+                // check each slot is what type??
+                AssignTypeIn(SymbolNeedAssign2, Type, i, cutslot);
             }
-            break;
+        }
+        break;
         case 3:
-            {
-                
-            }
-            break;
+        {
+        }
+        break;
         case 4:
-            Symbol* SymbolNeedAssign2;
+            Symbol *SymbolNeedAssign2;
             SymbolNeedAssign2 = FindSymbol(value);
             // x(maybe) = a(co type)
             AssignTypeOut(SymbolNeedAssign, SymbolNeedAssign2);
@@ -217,32 +218,34 @@ class HashTable
         return;
     }
 
-    void 
+    void
     INSERT(string name, int nTypeIn = 0)
     {
-        Symbol* NewSymbol = new Symbol(name, nTypeIn);
+        Symbol *NewSymbol = new Symbol(name, nTypeIn);
         int index_in_map = HASH_LINEAR(NewSymbol->key);
 
-        if(arr[index_in_map].key == 0)
+        if (arr[index_in_map].key == 0)
         {
             arr[index_in_map] = *NewSymbol;
+            cout << 0 << endl;
             return;
         }
         else
         {
-            for(int i = 0; i<Size_of_HashTable; i++)
+            for (int i = 0; i < Size_of_HashTable; i++)
             {
                 index_in_map = HASH_LINEAR_P(NewSymbol->key, i);
-                if(arr[index_in_map].key == 0)
+                if (arr[index_in_map].key == 0)
                 {
                     arr[index_in_map] = *NewSymbol;
+                    cout << i << endl;
                     return;
                 }
-                if(arr[index_in_map] == *NewSymbol)
+                if (arr[index_in_map] == *NewSymbol)
                 {
-                    cout<<"Redeclared";
+                    cout << "Redeclared";
                     exit(1);
-                }              
+                }
             }
         }
     }
@@ -271,11 +274,14 @@ class HashTable
     int CharCount(string String, char Char)
     {
         int count = 0;
-        while(true)
+        while (true)
         {
             int a = String.find(Char);
             String.erase(0, a + 1);
-            if(a==-1){return count;}
+            if (a == -1)
+            {
+                return count;
+            }
             count++;
         }
     }
@@ -301,17 +307,17 @@ class HashTable
     /////////////////////////
     bool CheckStringName()
     {
-        //Ki tu dau chu normal, con lai (chu normal, in hoa, _, so)
+        // Ki tu dau chu normal, con lai (chu normal, in hoa, _, so)
         return true;
     }
 
-    Symbol* FindSymbol(string name)
+    Symbol *FindSymbol(string name)
     {
-        //defaut level is 0 =>
+        // defaut level is 0 =>
 
-        for(int i = 0; i< Size_of_HashTable ; i++)
+        for (int i = 0; i < Size_of_HashTable; i++)
         {
-            if(arr[i].GetName() == name)
+            if (arr[i].GetName() == name)
             {
                 return &arr[i];
             }
@@ -319,95 +325,85 @@ class HashTable
 
         return NULL;
     }
-    string ReturnType(Symbol* a)
+    string ReturnType(Symbol *a)
     {
         return a->contain.TypeOut;
     }
 
-    void AssignTypeOut(Symbol* x, Symbol* a)
+    void AssignTypeOut(Symbol *x, Symbol *a)
     {
-        if(!InitType(x))
+        if (!InitType(x))
         {
-            //x = non a = non
-            if(!InitType(a))
+            // x = non a = non
+            if (!InitType(a))
             {
-                cout<<"TypeCannotBeInferred";
+                cout << "TypeCannotBeInferred";
             }
-            //if x(non) = a(int)
+            // if x(non) = a(int)
             x->contain.TypeOut = a->contain.TypeOut;
         }
         else
         {
-            //x = int
-            if(!InitType(a))
+            // x = int
+            if (!InitType(a))
             {
                 a->contain.TypeOut = x->contain.TypeOut;
             }
             else
             {
-                //if x(int) = a(int or string)
-                if(x->contain.TypeOut == a->contain.TypeOut)
+                // if x(int) = a(int or string)
+                if (x->contain.TypeOut == a->contain.TypeOut)
                 {
                     return;
                 }
                 else
                 {
-                    cout<<"Type missmatch";
+                    cout << "Type missmatch";
                 }
-            }        
+            }
         }
         return;
     }
-    void AssignTypeIn(Symbol* x, int Type, int i, string cuts)
+    void AssignTypeIn(Symbol *x, int Type, int i, string cuts)
     {
-        if(Type == 0)
+        if (Type == 0)
         {
             x->contain.TypeIn[i] = "Number";
         }
-        else if(Type == 1)
+        else if (Type == 1)
         {
             x->contain.TypeIn[i] = "String";
         }
-        else if(Type == 4)
+        else if (Type == 4)
         {
             x->contain.TypeIn[i] = FindSymbol(cuts)->contain.TypeOut;
         }
         else
         {
-            cout<<"Something Wrong in Assign fun(1,2,3)";
+            cout << "Something Wrong in Assign fun(1,2,3)";
         }
     }
-    bool InitType(Symbol* a)
+    bool InitType(Symbol *a)
     {
-        if(a->contain.TypeIn[0] == "Undefined")
+        if (a->contain.TypeIn[0] == "Undefined")
         {
             return false;
         }
         return true;
     }
-    
 };
+
 
 int main()
 {
     HashTable BangBam;
-    BangBam.HASH_LINEAR_MAP(7, 1);
-    BangBam.INSERT("y"); // y
-    BangBam.ASSIGN("y", "45"); // y = int = 45
-    BangBam.INSERT("sum", 3); // sum(1,2,3);
-    BangBam.INSERT("x"); // x
-    BangBam.ASSIGN("x", "10"); // x = int = 10      int int string
-    BangBam.ASSIGN("x", "sum(5,y,'alo')"); //x = sum(5,y,'alo')
-    BangBam.INSERT("z");                  //int    must be int        
-    BangBam.INSERT("foo", 1);
-    BangBam.ASSIGN("z", "foo('abc')");
-    
+    BangBam.HASH_LINEAR_MAP(19, 1);
+    BangBam.INSERT("a1");
+    BangBam.INSERT("b2");
+    BangBam.INSERT("rj", 2);
 
-// INSERT x
-// INSERT sum 2
-// ASSIGN x 1
-// ASSIGN x sum(5,x)
-// INSERT z
-// INSERT foo 1
-// ASSIGN z foo(’abc’)
+    // LINEAR 19 1
+    // INSERT a1
+    // INSERT b2
+    // INSERT rj 2
 }
