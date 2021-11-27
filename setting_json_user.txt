@@ -1,0 +1,15 @@
+{
+    "workbench.iconTheme": "vscode-icons",
+    "files.autoSave": "afterDelay",
+    "C_Cpp.updateChannel": "Insiders",
+    "editor.fontFamily": "'Fira Code',Consolas, 'Courier New', monospace",
+
+    //WindyFeng Setting
+    
+    "editor.fontLigatures": true,
+    "workbench.colorTheme": "Dracula",
+    "editor.wordWrap": "on",
+    "debug.inlineValues": true,
+    "editor.cursorBlinking": "expand",
+    "editor.cursorStyle": "line",
+}
