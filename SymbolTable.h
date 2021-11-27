@@ -11,7 +11,7 @@ public:
     string Value;
     int nTypeIn;
 
-    Contain() : Identifier(""), TypeOut(""), Value(""), nTypeIn(0) {}
+    Contain() : Identifier(""), TypeOut("Undefined"), Value(""), nTypeIn(0) {}
 
     friend class Symbol;
 
@@ -60,8 +60,8 @@ public:
 
     bool CheckStringNum(string value);
     int CheckTypeOfAssign(string &name);
-    void ASSIGN(string name, string value);
-    void INSERT(string name, int nTypeIn = 0);
+    void ASSIGN(string name,string Er, string value);
+    void INSERT(string name, string Er = "", int nTypeIn = 0);
     int CharCount(string String, char Char);
     Symbol *FindSymbol(string name);
 
@@ -107,7 +107,7 @@ public:
     /////////////////////////
     bool CheckStringName();
     string ReturnType(Symbol *a);
-    void AssignTypeOut(Symbol *x, Symbol *a);
+    void AssignTypeOut(Symbol *x, Symbol *a, string Er);
     void AssignTypeIn(Symbol *x, int Type, int i, string cuts);
     bool InitType(Symbol *a);
 };

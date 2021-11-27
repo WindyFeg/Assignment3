@@ -11,14 +11,14 @@ public:
     string Value;
     int nTypeIn;
 
-    Contain() : Identifier(""), TypeOut(""), Value(""), nTypeIn(0) {}
+    Contain() : Identifier(""), TypeOut("Undefined"), Value(""), nTypeIn(0) {}
 
     friend class Symbol;
 
     void AddContain(string identifier, int nTypeIn, string typeout, string value)
     {
         this->Identifier = identifier;
-        this->TypeOut = typeout;
+        this->TypeOut = "Undefined";
         this->Value = value;
         for (auto &x : TypeIn)
         {
@@ -196,6 +196,7 @@ public:
             {
                 string cutslot = value.substr(0, value.find(',')); // 1
                 value.erase(0, value.find(',') + 1);
+                if(i+1 == n){cutslot.pop_back();}
                 int Type = CheckTypeOfAssign(cutslot);
                 // check each slot is what type??
                 AssignTypeIn(SymbolNeedAssign2, Type, i, cutslot);
@@ -385,7 +386,7 @@ public:
     }
     bool InitType(Symbol *a)
     {
-        if (a->contain.TypeIn[0] == "Undefined")
+        if (a->contain.TypeOut == "Undefined")
         {
             return false;
         }
@@ -398,10 +399,13 @@ int main()
 {
     HashTable BangBam;
     BangBam.HASH_LINEAR_MAP(19, 1);
-    BangBam.INSERT("a1");
-    BangBam.INSERT("b2");
-    BangBam.INSERT("rj", 2);
-
+    BangBam.INSERT("x");
+    BangBam.INSERT("sum", 2);
+    BangBam.ASSIGN("x", "1");
+    BangBam.ASSIGN("x", "sum(5,x)");
+    BangBam.INSERT("z");
+    BangBam.INSERT("foo", 1);
+    BangBam.ASSIGN("z", "foo(’abc’)");
     // LINEAR 19 1
     // INSERT a1
     // INSERT b2

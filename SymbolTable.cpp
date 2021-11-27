@@ -3,7 +3,7 @@
 void Contain::AddContain(string identifier, int nTypeIn, string typeout, string value)
 {
     this->Identifier = identifier;
-    this->TypeOut = typeout;
+    this->TypeOut = "Undefined";
     this->Value = value;
     for (auto &x : TypeIn)
     {
@@ -52,7 +52,7 @@ int Symbol::GetKey()
 
 bool HashTable::InitType(Symbol *a)
 {
-    if (a->contain.TypeIn[0] == "Undefined")
+    if (a->contain.TypeOut == "Undefined")
     {
         return false;
     }
@@ -79,17 +79,19 @@ void HashTable::AssignTypeIn(Symbol *x, int Type, int i, string cuts)
     }
 }
 
-void HashTable::AssignTypeOut(Symbol *x, Symbol *a)
+void HashTable::AssignTypeOut(Symbol *x, Symbol *a, string Er)
 {
     if (!InitType(x))
     {
         // x = non a = non
         if (!InitType(a))
         {
-            cout << "TypeCannotBeInferred";
+            throw TypeCannotBeInfered(Er);
+            exit(1);
         }
         // if x(non) = a(int)
         x->contain.TypeOut = a->contain.TypeOut;
+        return;
     }
     else
     {
@@ -97,6 +99,7 @@ void HashTable::AssignTypeOut(Symbol *x, Symbol *a)
         if (!InitType(a))
         {
             a->contain.TypeOut = x->contain.TypeOut;
+            return;
         }
         else
         {
@@ -118,7 +121,7 @@ Symbol *HashTable::FindSymbol(string name)
 {
     // defaut level is 0 =>
 
-    for (int i = 0; i <Size_of_HashTable; i++)
+    for (int i = 0; i < Size_of_HashTable; i++)
     {
         if (arr[i].GetName() == name)
         {
@@ -154,7 +157,7 @@ int HashTable::CharCount(string String, char Char)
     }
 }
 
-void HashTable::ASSIGN(string name, string value)
+void HashTable::ASSIGN(string name, string Er, string value)
 {
     Symbol *SymbolNeedAssign;
     SymbolNeedAssign = FindSymbol(name);
@@ -186,7 +189,7 @@ void HashTable::ASSIGN(string name, string value)
         Symbol *SymbolNeedAssign2; // fun
         SymbolNeedAssign2 = FindSymbol(value.substr(0, value.find('(')));
         // Assign x(type = a) = a;
-        AssignTypeOut(SymbolNeedAssign, SymbolNeedAssign2);
+        AssignTypeOut(SymbolNeedAssign, SymbolNeedAssign2, Er);
 
         // Check fun(1,2,3)
         value.erase(0, value.find('(') + 1); // 1,a,'b')
@@ -197,6 +200,10 @@ void HashTable::ASSIGN(string name, string value)
         {
             string cutslot = value.substr(0, value.find(',')); // 1
             value.erase(0, value.find(',') + 1);
+            if (i + 1 == n)
+            {
+                cutslot.pop_back();
+            }
             int Type = CheckTypeOfAssign(cutslot);
             // check each slot is what type??
             AssignTypeIn(SymbolNeedAssign2, Type, i, cutslot);
@@ -208,11 +215,14 @@ void HashTable::ASSIGN(string name, string value)
     }
     break;
     case 4:
+    {
         Symbol *SymbolNeedAssign2;
         SymbolNeedAssign2 = FindSymbol(value);
         // x(maybe) = a(co type)
-        AssignTypeOut(SymbolNeedAssign, SymbolNeedAssign2);
-        break;
+        cout << "vao case 4";
+        AssignTypeOut(SymbolNeedAssign, SymbolNeedAssign2, Er);
+    }
+    break;
     default:
         break;
     }
@@ -274,7 +284,7 @@ int HashTable::CheckTypeOfAssign(string &name)
     return 5;
 }
 
-void HashTable::INSERT(string name, int nTypeIn)
+void HashTable::INSERT(string name, string Er, int nTypeIn)
 {
     Symbol *NewSymbol = new Symbol(name, nTypeIn);
     int index_in_map = HASH_LINEAR(NewSymbol->key);
@@ -298,14 +308,113 @@ void HashTable::INSERT(string name, int nTypeIn)
             }
             if (arr[index_in_map] == *NewSymbol)
             {
-                cout << "Redeclared";
+                throw Redeclared("INSERT " + Er);
                 exit(1);
             }
         }
     }
 }
+int Convert(string input)
+{
+    if (input == "LINEAR")
+    {
+        return 0;
+    }
+    else if (input == "QUADRATIC")
+    {
+        return 1;
+    }
+    else if (input == "DOUBLE")
+    {
+        return 2;
+    }
+    else if (input == "INSERT")
+    {
+        return 10;
+    }
+    else if (input == "ASSIGN")
+    {
+        return 11;
+    }
+    else if (input == "CALL")
+    {
+        return 12;
+    }
+    else if (input == "BEGIN")
+    {
+        return 13;
+    }
+    else if (input == "END")
+    {
+        return 14;
+    }
+    else if (input == "LOOKUP")
+    {
+        return 15;
+    }
+    else
+    {
+        return 20;
+    }
+}
 
 void SymbolTable::run(string filename)
 {
-    cout << "success";
+    ifstream file(filename);
+    string line, input;
+
+    HashTable BangBam;
+
+    while (getline(file, line))
+    {
+        input = line.substr(0, line.find(' '));
+        switch (Convert(input))
+        {
+        case 0:
+        {
+            // LINEAR
+            line.erase(0, line.find(' ') + 1);
+            BangBam.HASH_LINEAR_MAP(stoi(line.substr(0, line.find(' '))), std::stoi(line.substr(line.find(' ') + 1)));
+            break;
+        }
+        case 1:
+        {
+
+            break;
+        }
+        case 2:
+        {
+
+            break;
+        }
+        case 10:
+        {
+            // INSERT
+            line.erase(0, line.find(' ') + 1);
+            if (line.find(' ') == -1)
+            {
+                // dang add string
+                BangBam.INSERT(line, line);
+            }
+            else
+            {
+                // dang ham
+                BangBam.INSERT(line.substr(0, line.find(' ')), line, stoi(line.substr(line.find(' ') + 1)));
+            }
+
+            break;
+        }
+        case 11:
+        {
+            // ASSIGN
+            line.erase(0, line.find(' ') + 1);
+            BangBam.ASSIGN(line.substr(0, line.find(' ')), line, line.substr(line.find(' ') + 1));
+            cout << 0 << endl; // temporary we print out 0, then we count number of hash to print
+            break;
+        }
+        default:
+            cout << "Reinput pls";
+            break;
+        }
+    }
 }
