@@ -119,14 +119,14 @@ public:
     }
 };
 
-class TypeCannotBeInfered : public exception
+class TypeCannotBeInferred : public exception
 {
     string mess;
 
 public:
-    TypeCannotBeInfered(string instruction)
+    TypeCannotBeInferred(string instruction)
     {
-        mess = "TypeCannotBeInfered: " + instruction;
+        mess = "TypeCannotBeInferred: " + instruction;
     }
     const char *what() const throw()
     {

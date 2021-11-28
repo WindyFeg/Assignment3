@@ -1,9 +1,5 @@
-LINEAR 19 1
-INSERT x
-INSERT sum 2
-ASSIGN x 1
-ASSIGN x sum(5,x)
-INSERT z
-INSERT foo 1
-ASSIGN z foo(’abc’)
-
+LINEAR 864 732
+INSERT v7dNYt 4
+ASSIGN v7dNYt v7dNYt('0cNie','ic','JWB3','d7')
+ASSIGN v7dNYt v7dNYt(v7dNYt,884,v7dNYt,v7dNYt)
+ASSIGN v7dNYt v7dNYt(965,311,'vDR1T','o2')
