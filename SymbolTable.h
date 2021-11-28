@@ -9,8 +9,9 @@ public:
     string TypeIn[20];
     string TypeOut;
     string Value;
-    int nTypeIn;
+    int slot = 0;
 
+    int nTypeIn;
     Contain() : Identifier(""), TypeOut("Undefined"), Value(""), nTypeIn(0) {}
 
     friend class Symbol;
@@ -61,17 +62,33 @@ public:
     bool CheckStringNum(string value);
     int CheckTypeOfAssign(string &name);
     void ASSIGN(string name, string Er, string value);
-    void INSERT(string name, string Er = "", int nTypeIn = 0);
+    void INSERT(string name, string Er = "", int level = 0, int nTypeIn = 0);
     void CheckErForFunc(Symbol *SymbolNeedAssign, Symbol *SymbolNeedAssign2, string value, string name, string Er);
     void CheckErForVar(Symbol *SymbolNeedAssign, string value, string name, string Er);
     int CharCount(string String, char Char);
     Symbol *FindSymbol(string name);
+    void DeleteSymbolLevel(string name, int level);
+    void LOOK_UP(string name, int level);
+    void CALL(string name, string Er);
 
     void HASH_LINEAR_MAP(int size, int c)
     { // find
         Size_of_HashTable = size;
         arr = new Symbol[size];
         this->c = c;
+    }
+    void HASH_DOUBLE_MAP(int size, int c)
+    {
+        Size_of_HashTable = size;
+        arr = new Symbol[size];
+        this->c = c;
+    }
+    void HASH_QUADRATIC_MAP(int size, int c, int c2)
+    {
+        Size_of_HashTable = size;
+        arr = new Symbol[size];
+        this->c = c;
+        this->c2 = c2;
     }
     /////////////////////////
     long long HASH_DOUBLE1(int k)

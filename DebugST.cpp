@@ -7,8 +7,9 @@ public:
     string TypeIn[20];
     string TypeOut;
     string Value;
-    int nTypeIn;
+    int slot = 0;
 
+    int nTypeIn;
     Contain() : Identifier(""), TypeOut("Undefined"), Value(""), nTypeIn(0) {}
 
     friend class Symbol;
@@ -59,17 +60,33 @@ public:
     bool CheckStringNum(string value);
     int CheckTypeOfAssign(string &name);
     void ASSIGN(string name, string Er, string value);
-    void INSERT(string name, string Er = "", int nTypeIn = 0);
+    void INSERT(string name, string Er = "", int level = 0, int nTypeIn = 0);
     void CheckErForFunc(Symbol *SymbolNeedAssign, Symbol *SymbolNeedAssign2, string value, string name, string Er);
     void CheckErForVar(Symbol *SymbolNeedAssign, string value, string name, string Er);
     int CharCount(string String, char Char);
     Symbol *FindSymbol(string name);
+    void DeleteSymbolLevel(string name, int level);
+    void LOOK_UP(string name, int level);
+    void CALL(string name, string Er);
 
     void HASH_LINEAR_MAP(int size, int c)
     { // find
         Size_of_HashTable = size;
         arr = new Symbol[size];
         this->c = c;
+    }
+    void HASH_DOUBLE_MAP(int size, int c)
+    {
+        Size_of_HashTable = size;
+        arr = new Symbol[size];
+        this->c = c;
+    }
+    void HASH_QUADRATIC_MAP(int size, int c, int c2)
+    {
+        Size_of_HashTable = size;
+        arr = new Symbol[size];
+        this->c = c;
+        this->c2 = c2;
     }
     /////////////////////////
     long long HASH_DOUBLE1(int k)
@@ -118,7 +135,7 @@ public:
     SymbolTable() {}
     void run(string filename);
 };
-//alo
+// alo
 void Contain::AddContain(string identifier, int nTypeIn, string typeout, string value)
 {
     this->Identifier = identifier;
@@ -138,23 +155,23 @@ bool Symbol::operator==(Symbol &Sec)
     return false;
 }
 
-Symbol::Symbol(string name, int nTypeIn)
+Symbol::Symbol(string name, int nTypeIn, int level)
 {
     this->contain.Identifier = name;
     for (auto &x : this->contain.TypeIn)
     {
         x = "Undefined";
     }
-    this->level_of_block = 0;
+    this->level_of_block = level;
     this->key = HASH_NAME(this);
     this->contain.nTypeIn = nTypeIn;
 }
-Symbol::Symbol(string name, int level, int key)
-{
-    this->contain.Identifier = name;
-    this->key = key;
-    this->level_of_block;
-}
+// Symbol::Symbol(string name, int level, int key)
+// {
+//     this->contain.Identifier = name;
+//     this->key = key;
+//     this->level_of_block;
+// }
 
 string Symbol::GetName()
 {
@@ -250,6 +267,39 @@ Symbol *HashTable::FindSymbol(string name)
 
     return NULL;
 }
+
+void HashTable::LOOK_UP(string name, int level)
+{
+    int i = 0;
+    for (i = level; i >= 0; i--)
+    {
+        for (int j = 0; j < Size_of_HashTable; j++)
+        {
+            if (arr[j].level_of_block == i && arr[j].contain.Identifier == name)
+            {
+                cout << HASH_LINEAR(arr[j].key) << endl;
+                return;
+            }
+        }
+    }
+    return;
+}
+
+void HashTable::DeleteSymbolLevel(string Er, int level)
+{
+    // defaut level is 0 =>
+    Symbol a;
+    for (int i = 0; i < Size_of_HashTable; i++)
+    {
+        if (this->arr[i].level_of_block == level)
+        {
+            arr[i] = a;
+        }
+    }
+
+    return;
+}
+
 string HashTable::ReturnType(Symbol *a)
 {
     return a->contain.TypeOut;
@@ -264,18 +314,21 @@ bool HashTable::CheckStringName()
 void HashTable::CheckErForVar(Symbol *SymbolNeedAssign, string value, string name, string Er)
 {
     int type = CheckType2(value); // 0 1 2 3 ok 5
-    if(type == 5)
+    if (type == 5)
     {
         throw Undeclared(value);
+        exit(1);
     }
     if (SymbolNeedAssign == NULL)
     {
         throw Undeclared(name);
+        exit(1);
     }
     if (SymbolNeedAssign != NULL)
     {
         if (SymbolNeedAssign->contain.nTypeIn >= 1)
             throw TypeMismatch("ASSIGN " + Er);
+        exit(1);
     }
 }
 
@@ -284,6 +337,7 @@ void HashTable::CheckErForFunc(Symbol *SymbolNeedAssign, Symbol *SymbolNeedAssig
     if (SymbolNeedAssign2 == NULL)
     {
         throw Undeclared(value);
+        exit(1);
     }
     if (SymbolNeedAssign2 != NULL)
     {
@@ -293,7 +347,11 @@ void HashTable::CheckErForFunc(Symbol *SymbolNeedAssign, Symbol *SymbolNeedAssig
             value.erase(0, value.find('(') + 1);
             int n = CharCount(value, ',') + 1;
 
-            if(n != SymbolNeedAssign2->contain.nTypeIn){throw TypeMismatch("ASSIGN " + Er);}
+            if (n != SymbolNeedAssign2->contain.nTypeIn)
+            {
+                throw TypeMismatch("ASSIGN " + Er);
+                exit(1);
+            }
 
             for (int i = 0; i < n; i++)
             {
@@ -307,18 +365,20 @@ void HashTable::CheckErForFunc(Symbol *SymbolNeedAssign, Symbol *SymbolNeedAssig
                 if (isFuc == 2)
                 {
                     throw TypeMismatch("ASSIGN " + Er);
+                    exit(1);
                 }
-                if(isFuc == 5)
+                if (isFuc == 5)
                 {
                     throw Undeclared(cutslot);
+                    exit(1);
                 }
-                if(isFuc == 4)
+                if (isFuc == 4)
                 {
-                    if(SymbolNeedAssign2->contain.TypeIn[i] == "Undefined" && FindSymbol(cutslot)->contain.TypeOut == "Undefined")
+                    if (SymbolNeedAssign2->contain.TypeIn[i] == "Undefined" && FindSymbol(cutslot)->contain.TypeOut == "Undefined")
                     {
                         throw TypeCannotBeInferred("ASSIGN " + Er);
                         exit(1);
-                    }  
+                    }
                 }
             }
         }
@@ -343,19 +403,21 @@ int HashTable::CheckType2(string cutslot)
     if (FindSymbol(cutslot) == NULL)
     {
         // string or int
-        if(CheckTypeOfAssign(cutslot) == 0)
+        if (CheckTypeOfAssign(cutslot) == 0)
         {
             return 0;
         };
-        if(CheckTypeOfAssign(cutslot) == 1)
+        if (CheckTypeOfAssign(cutslot) == 1)
         {
             return 1;
         }
-        else return 5;
+        else
+            return 5;
     }
     if (FindSymbol(cutslot)->contain.nTypeIn == 0)
         return 4; // a
-    if (FindSymbol(cutslot)->contain.nTypeIn > 0) return 2; // fuction
+    if (FindSymbol(cutslot)->contain.nTypeIn > 0)
+        return 2; // fuction
     return 5;
 }
 
@@ -447,6 +509,8 @@ void HashTable::ASSIGN(string name, string Er, string value)
     default:
         break;
     }
+
+    cout << SymbolNeedAssign->contain.slot << endl;
     return;
 }
 
@@ -505,9 +569,9 @@ int HashTable::CheckTypeOfAssign(string &name)
     return 5;
 }
 
-void HashTable::INSERT(string name, string Er, int nTypeIn)
+void HashTable::INSERT(string name, string Er, int level, int nTypeIn)
 {
-    Symbol *NewSymbol = new Symbol(name, nTypeIn);
+    Symbol *NewSymbol = new Symbol(name, nTypeIn, level);
     int index_in_map = HASH_LINEAR(NewSymbol->key);
 
     if (arr[index_in_map].key == 0)
@@ -525,6 +589,7 @@ void HashTable::INSERT(string name, string Er, int nTypeIn)
             {
                 arr[index_in_map] = *NewSymbol;
                 cout << i << endl;
+                arr[index_in_map].contain.slot = i;
                 return;
             }
             if (arr[index_in_map] == *NewSymbol)
@@ -535,6 +600,72 @@ void HashTable::INSERT(string name, string Er, int nTypeIn)
         }
     }
 }
+
+void HashTable::CALL(string name, string Er)
+{
+    if (name.find('(') == -1 || name.find(')') == -1)
+    {
+        throw InvalidInstruction(Er);
+        exit(1);
+    }
+
+    Symbol *SymbolNeedAssign2; // fun
+    SymbolNeedAssign2 = FindSymbol(name.substr(0, name.find('(')));
+    // Assign x(type = a) = a;
+
+    if (SymbolNeedAssign2 == NULL)
+    {
+        throw Undeclared(name.substr(0, name.find('(')));
+        exit(1);
+    }
+    if (SymbolNeedAssign2 != NULL)
+    {
+        // check behind
+        if (name.find('(') != -1)
+        {
+            name.erase(0, name.find('(') + 1);
+            int n = CharCount(name, ',') + 1;
+
+            if (n != SymbolNeedAssign2->contain.nTypeIn)
+            {
+                throw TypeMismatch(Er);
+                exit(1);
+            }
+
+            for (int i = 0; i < n; i++)
+            {
+                string cutslot = name.substr(0, name.find(',')); // 1
+                name.erase(0, name.find(',') + 1);
+                if (i + 1 == n)
+                {
+                    cutslot.pop_back();
+                }
+                int isFuc = CheckType2(cutslot); // 0 1 int string
+                if (isFuc == 2)
+                {
+                    throw TypeMismatch(Er);
+                    exit(1);
+                }
+                if (isFuc == 5)
+                {
+                    throw Undeclared(cutslot);
+                    exit(1);
+                }
+                if (isFuc == 4)
+                {
+                    if (SymbolNeedAssign2->contain.TypeIn[i] == "Undefined" && FindSymbol(cutslot)->contain.TypeOut == "Undefined")
+                    {
+                        throw TypeCannotBeInferred(Er);
+                        exit(1);
+                    }
+                }
+            }
+        }
+    }
+    cout << SymbolNeedAssign2->contain.slot << endl;
+    return;
+}
+
 int Convert(string input)
 {
     if (input == "LINEAR")
@@ -573,6 +704,10 @@ int Convert(string input)
     {
         return 15;
     }
+    else if (input == "PRINT")
+    {
+        return 16;
+    }
     else
     {
         return 20;
@@ -585,6 +720,7 @@ void SymbolTable::run(string filename)
     string line, input;
 
     HashTable BangBam;
+    int levelNow = 0;
 
     while (getline(file, line))
     {
@@ -600,27 +736,40 @@ void SymbolTable::run(string filename)
         }
         case 1:
         {
-
+            // QUADRATIC
+            line.erase(0, line.find(' ') + 1);
+            long long a = stol(line.substr(0, line.find(' ')));
+            line.erase(0, line.find(' ') + 1);
+            BangBam.HASH_QUADRATIC_MAP(a, stol(line.substr(0, line.find(' '))), stol(line.substr(line.find(' ') + 1)));
             break;
         }
         case 2:
         {
-
+            // DOUBLE
+            line.erase(0, line.find(' ') + 1);
+            BangBam.HASH_DOUBLE_MAP(stol(line.substr(0, line.find(' '))), std::stol(line.substr(line.find(' ') + 1)));
             break;
         }
         case 10:
         {
             // INSERT
             line.erase(0, line.find(' ') + 1);
+
+            if (levelNow != 0 && line.find(' ') != -1)
+            {
+                throw InvalidDeclaration(line.substr(0, line.find(' ')));
+                exit(1);
+            }
+
             if (line.find(' ') == -1)
             {
                 // dang add string
-                BangBam.INSERT(line, line);
+                BangBam.INSERT(line, line, levelNow);
             }
             else
             {
                 // dang ham
-                BangBam.INSERT(line.substr(0, line.find(' ')), line, stol(line.substr(line.find(' ') + 1)));
+                BangBam.INSERT(line.substr(0, line.find(' ')), line, levelNow, stol(line.substr(line.find(' ') + 1)));
             }
 
             break;
@@ -630,13 +779,64 @@ void SymbolTable::run(string filename)
             // ASSIGN
             line.erase(0, line.find(' ') + 1);
             BangBam.ASSIGN(line.substr(0, line.find(' ')), line, line.substr(line.find(' ') + 1));
-            cout << 0 << endl; // temporary we print out 0, then we count number of hash to print
+            // temporary we print out 0, then we count number of hash to print
             break;
         }
+        case 12:
+        {
+            // Call
+            // Undeclared, TypeMismatch, TypeCannotBeInferred.
+            //  (0 1 3)
+            line.erase(0, line.find(' ') + 1);
+            BangBam.CALL(line, "CALL " + line);
+
+            break;
+        }
+        case 13: // begin
+        {
+            levelNow++;
+        }
+        break;
+        case 14: // end
+        {
+            levelNow--;
+            if (levelNow < 0)
+            {
+                throw UnknownBlock();
+                exit(1);
+            }
+            BangBam.DeleteSymbolLevel(line, levelNow + 1);
+        }
+        break;
+        case 15:
+        { // LOOKUP
+            line.erase(0, line.find(' ') + 1);
+            if (BangBam.FindSymbol(line) == NULL)
+            {
+                throw Undeclared(line);
+                exit(1);
+            }
+            BangBam.LOOK_UP(line, levelNow);
+        }
+        break;
+        case 16:
+        {
+        }
+        break;
         default:
             cout << "Reinput pls";
             break;
         }
+    }
+    if (levelNow < 0)
+    {
+        throw UnknownBlock();
+        exit(1);
+    }
+    else if (levelNow > 0)
+    {
+        throw UnclosedBlock(levelNow);
+        exit(1);
     }
 }
 
@@ -646,4 +846,7 @@ int main()
     string a;
     a = "test.txt";
     b.SymbolTable::run(a);
+
+    // – InvalidDeclaration nếu khai báo hàm trong các khối có mức khác 0.
+    // – Overflow nếu khai báo không thể tìm được vị trí trống phù hợp trong bảng băm.
 }
