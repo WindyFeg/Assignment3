@@ -61,15 +61,15 @@ bool HashTable::InitType(Symbol *a)
 
 long long HashTable::HASH_CHOSE(long long k, int HashType)
 {
-    if(HashType == 0)
+    if (HashType == 0)
     {
         return HASH_LINEAR(k);
     }
-    if(HashType == 1)
+    if (HashType == 1)
     {
         return HASH_DOUBLE1(k);
     }
-    if(HashType == 2)
+    if (HashType == 2)
     {
         return HASH_QUADRATIC(k);
     }
@@ -78,17 +78,17 @@ long long HashTable::HASH_CHOSE(long long k, int HashType)
 
 long long HashTable::HASH_CHOSE_P(long long k, int i, int HashType)
 {
-    if(HashType == 0)
+    if (HashType == 0)
     {
-        return HASH_LINEAR_P(k,i);
+        return HASH_LINEAR_P(k, i);
     }
-    if(HashType == 1)
+    if (HashType == 1)
     {
-        return HASH_DOUBLE_P(k,i);
+        return HASH_DOUBLE_P(k, i);
     }
-    if(HashType == 2)
+    if (HashType == 2)
     {
-        return HASH_QUADRATIC_P(k,i);
+        return HASH_QUADRATIC_P(k, i);
     }
     return -1;
 };
@@ -97,7 +97,7 @@ void HashTable::AssignTypeIn(Symbol *x, int Type, int i, string cuts, string Er)
 {
     if (Type == 0)
     {
-        if(x->contain.TypeIn[i] == "Undefined" ||x->contain.TypeIn[i] == "Number")
+        if (x->contain.TypeIn[i] == "Undefined" || x->contain.TypeIn[i] == "Number")
         {
             x->contain.TypeIn[i] = "Number";
         }
@@ -108,7 +108,7 @@ void HashTable::AssignTypeIn(Symbol *x, int Type, int i, string cuts, string Er)
     }
     else if (Type == 1)
     {
-        if(x->contain.TypeIn[i] == "Undefined" ||x->contain.TypeIn[i] == "String")
+        if (x->contain.TypeIn[i] == "Undefined" || x->contain.TypeIn[i] == "String")
         {
             x->contain.TypeIn[i] = "String";
         }
@@ -119,7 +119,7 @@ void HashTable::AssignTypeIn(Symbol *x, int Type, int i, string cuts, string Er)
     }
     else if (Type == 4)
     {
-        if(x->contain.TypeIn[i] == "Undefined" ||x->contain.TypeIn[i] == FindSymbol(cuts)->contain.TypeOut)
+        if (x->contain.TypeIn[i] == "Undefined" || x->contain.TypeIn[i] == FindSymbol(cuts)->contain.TypeOut)
         {
             x->contain.TypeIn[i] = FindSymbol(cuts)->contain.TypeOut;
         }
@@ -218,7 +218,7 @@ long long HashTable::LOOK_UP(string name, int level, int HashType)
         {
             if (arr[j].level_of_block == i && arr[j].contain.Identifier == name)
             {
-                //return HASH_CHOSE(arr[j].key, HashType);
+                // return HASH_CHOSE(arr[j].key, HashType);
                 return j;
             }
         }
@@ -246,10 +246,25 @@ string HashTable::ReturnType(Symbol *a)
     return a->contain.TypeOut;
 }
 
-bool HashTable::CheckStringName()
+void HashTable::CheckStringName(string name,string Er)
 {
     // Ki tu dau chu normal, con lai (chu normal, in hoa, _, so)
-    return true;
+    if('A' <=name[0] && name[0]<= 'Z' )
+    {
+        throw InvalidInstruction(Er);
+            exit(1);
+    } 
+    int i=0;
+    while (name[i]!='\0')
+    {
+        if(name[i]=='&' || name[i]=='@'|| name[i]=='$' ||name[i]=='*'||name[i]=='!'||name[i]=='%'||name[i]=='^')
+        {
+            throw InvalidInstruction(name);
+            exit(1);
+        }
+        i++;
+    }
+    return;
 }
 
 void HashTable::CheckErForVar(Symbol *SymbolNeedAssign, string value, string name, string Er)
@@ -323,7 +338,7 @@ void HashTable::CheckErForFunc(Symbol *SymbolNeedAssign, Symbol *SymbolNeedAssig
                         exit(1);
                     }
                 }
-                AssignTypeIn(SymbolNeedAssign2, isFuc, i, cutslot,"ASSIGN "+ Er);
+                AssignTypeIn(SymbolNeedAssign2, isFuc, i, cutslot, "ASSIGN " + Er);
             }
         }
     }
@@ -432,7 +447,7 @@ void HashTable::ASSIGN(string name, string Er, string value, int TypeHash)
             }
             int Type = CheckTypeOfAssign(cutslot);
             // check each slot is what type??
-            AssignTypeIn(SymbolNeedAssign2, Type, i, cutslot,"ASSIGN "+ Er);
+            AssignTypeIn(SymbolNeedAssign2, Type, i, cutslot, "ASSIGN " + Er);
         }
     }
     break;
@@ -513,11 +528,11 @@ int HashTable::CheckTypeOfAssign(string &name)
     return 5;
 }
 
-void HashTable::INSERT(string name, string Er,int TypeHash, int level, int nTypeIn)
+void HashTable::INSERT(string name, string Er, int TypeHash, int level, int nTypeIn)
 {
+    CheckStringName(name,Er);
     Symbol *NewSymbol = new Symbol(name, nTypeIn, level);
     int index_in_map = HASH_CHOSE(NewSymbol->key, TypeHash);
-
 
     if (arr[index_in_map].key == 0)
     {
@@ -602,6 +617,10 @@ void HashTable::CALL(string name, string Er)
                     {
                         throw TypeCannotBeInferred(Er);
                         exit(1);
+                    }
+                    if (SymbolNeedAssign2->contain.TypeIn[i] != "Undefined" && FindSymbol(cutslot)->contain.TypeOut == "Undefined")
+                    {
+                        FindSymbol(cutslot)->contain.TypeOut = SymbolNeedAssign2->contain.TypeIn[i];
                     }
                 }
                 AssignTypeIn(SymbolNeedAssign2, isFuc, i, cutslot, Er);
@@ -713,12 +732,12 @@ void SymbolTable::run(string filename)
             if (line.find(' ') == -1)
             {
                 // dang add string
-                BangBam.INSERT(line, line,TypeHash, levelNow);
+                BangBam.INSERT(line, line, TypeHash, levelNow);
             }
             else
             {
                 // dang ham
-                BangBam.INSERT(line.substr(0, line.find(' ')), line,TypeHash ,levelNow, stol(line.substr(line.find(' ') + 1)));
+                BangBam.INSERT(line.substr(0, line.find(' ')), line, TypeHash, levelNow, stol(line.substr(line.find(' ') + 1)));
             }
 
             break;

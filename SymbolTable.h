@@ -62,7 +62,7 @@ public:
     bool CheckStringNum(string value);
     int CheckTypeOfAssign(string &name);
     void ASSIGN(string name, string Er, string value, int TypeHash);
-    void INSERT(string name, string Er = "",int TypeHash = 0,int level = 0, int nTypeIn = 0);
+    void INSERT(string name, string Er = "", int TypeHash = 0, int level = 0, int nTypeIn = 0);
     void PRINT(int level);
     void CheckErForFunc(Symbol *SymbolNeedAssign, Symbol *SymbolNeedAssign2, string value, string name, string Er);
     void CheckErForVar(Symbol *SymbolNeedAssign, string value, string name, string Er);
@@ -127,7 +127,7 @@ public:
     long long HASH_CHOSE(long long k, int HashType);
     long long HASH_CHOSE_P(long long k, int i, int HashType);
 
-    bool CheckStringName();
+    void CheckStringName(string name, string Er);
     string ReturnType(Symbol *a);
     void AssignTypeOut(Symbol *x, Symbol *a, string Er);
     void AssignTypeIn(Symbol *x, int Type, int i, string cuts, string Er);

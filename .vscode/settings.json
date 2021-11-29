@@ -8,7 +8,8 @@
         "editor.fontFamily": "'Fira Code'",
         "string": "cpp",
         "iostream": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "iosfwd": "cpp"
     }
     
 }
