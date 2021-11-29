@@ -63,12 +63,13 @@ public:
     int CheckTypeOfAssign(string &name);
     void ASSIGN(string name, string Er, string value);
     void INSERT(string name, string Er = "", int level = 0, int nTypeIn = 0);
+    void PRINT(int level);
     void CheckErForFunc(Symbol *SymbolNeedAssign, Symbol *SymbolNeedAssign2, string value, string name, string Er);
     void CheckErForVar(Symbol *SymbolNeedAssign, string value, string name, string Er);
     int CharCount(string String, char Char);
     Symbol *FindSymbol(string name);
     void DeleteSymbolLevel(string name, int level);
-    void LOOK_UP(string name, int level);
+    long long LOOK_UP(string name, int level);
     void CALL(string name, string Er);
 
     void HASH_LINEAR_MAP(int size, int c)
@@ -127,7 +128,7 @@ public:
     bool CheckStringName();
     string ReturnType(Symbol *a);
     void AssignTypeOut(Symbol *x, Symbol *a, string Er);
-    void AssignTypeIn(Symbol *x, int Type, int i, string cuts);
+    void AssignTypeIn(Symbol *x, int Type, int i, string cuts, string Er);
     bool InitType(Symbol *a);
 };
 

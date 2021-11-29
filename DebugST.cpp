@@ -61,12 +61,13 @@ public:
     int CheckTypeOfAssign(string &name);
     void ASSIGN(string name, string Er, string value);
     void INSERT(string name, string Er = "", int level = 0, int nTypeIn = 0);
+    void PRINT(int level);
     void CheckErForFunc(Symbol *SymbolNeedAssign, Symbol *SymbolNeedAssign2, string value, string name, string Er);
     void CheckErForVar(Symbol *SymbolNeedAssign, string value, string name, string Er);
     int CharCount(string String, char Char);
     Symbol *FindSymbol(string name);
     void DeleteSymbolLevel(string name, int level);
-    void LOOK_UP(string name, int level);
+    long long LOOK_UP(string name, int level);
     void CALL(string name, string Er);
 
     void HASH_LINEAR_MAP(int size, int c)
@@ -125,7 +126,7 @@ public:
     bool CheckStringName();
     string ReturnType(Symbol *a);
     void AssignTypeOut(Symbol *x, Symbol *a, string Er);
-    void AssignTypeIn(Symbol *x, int Type, int i, string cuts);
+    void AssignTypeIn(Symbol *x, int Type, int i, string cuts, string Er);
     bool InitType(Symbol *a);
 };
 
@@ -195,24 +196,67 @@ bool HashTable::InitType(Symbol *a)
     return true;
 }
 
-void HashTable::AssignTypeIn(Symbol *x, int Type, int i, string cuts)
+void HashTable::AssignTypeIn(Symbol *x, int Type, int i, string cuts, string Er)
 {
     if (Type == 0)
     {
-        x->contain.TypeIn[i] = "Number";
+        if(x->contain.TypeIn[i] == "Undefined" ||x->contain.TypeIn[i] == "Number")
+        {
+            x->contain.TypeIn[i] = "Number";
+        }
+        else
+        {
+            throw TypeMismatch(Er);
+        }
     }
     else if (Type == 1)
     {
-        x->contain.TypeIn[i] = "String";
+        if(x->contain.TypeIn[i] == "Undefined" ||x->contain.TypeIn[i] == "String")
+        {
+            x->contain.TypeIn[i] = "String";
+        }
+        else
+        {
+            throw TypeMismatch(Er);
+        }
     }
     else if (Type == 4)
     {
-        x->contain.TypeIn[i] = FindSymbol(cuts)->contain.TypeOut;
+        if(x->contain.TypeIn[i] == "Undefined" ||x->contain.TypeIn[i] == FindSymbol(cuts)->contain.TypeOut)
+        {
+            x->contain.TypeIn[i] = FindSymbol(cuts)->contain.TypeOut;
+        }
+        else
+        {
+            throw TypeMismatch(Er);
+        }
     }
     else
     {
         cout << "Something Wrong in Assign fun(1,2,3)";
     }
+}
+
+void HashTable::PRINT(int level)
+{
+    string Res = "";
+
+    for (int j = 0; j < Size_of_HashTable; j++)
+    {
+        if (arr[j].contain.Identifier != "")
+        {
+
+            Res = Res + to_string(j) + " " + arr[j].contain.Identifier + "//" + to_string(arr[j].level_of_block) + ";";
+        }
+    }
+
+    if (Res == "")
+    {
+        return;
+    }
+    Res.pop_back();
+    cout << Res << endl;
+    return;
 }
 
 void HashTable::AssignTypeOut(Symbol *x, Symbol *a, string Er)
@@ -268,7 +312,7 @@ Symbol *HashTable::FindSymbol(string name)
     return NULL;
 }
 
-void HashTable::LOOK_UP(string name, int level)
+long long HashTable::LOOK_UP(string name, int level)
 {
     int i = 0;
     for (i = level; i >= 0; i--)
@@ -277,12 +321,11 @@ void HashTable::LOOK_UP(string name, int level)
         {
             if (arr[j].level_of_block == i && arr[j].contain.Identifier == name)
             {
-                cout << HASH_LINEAR(arr[j].key) << endl;
-                return;
+                return HASH_LINEAR(arr[j].key);
             }
         }
     }
-    return;
+    return -1;
 }
 
 void HashTable::DeleteSymbolLevel(string Er, int level)
@@ -327,8 +370,10 @@ void HashTable::CheckErForVar(Symbol *SymbolNeedAssign, string value, string nam
     if (SymbolNeedAssign != NULL)
     {
         if (SymbolNeedAssign->contain.nTypeIn >= 1)
+        {
             throw TypeMismatch("ASSIGN " + Er);
-        exit(1);
+            exit(1);
+        }
     }
 }
 
@@ -488,7 +533,7 @@ void HashTable::ASSIGN(string name, string Er, string value)
             }
             int Type = CheckTypeOfAssign(cutslot);
             // check each slot is what type??
-            AssignTypeIn(SymbolNeedAssign2, Type, i, cutslot);
+            AssignTypeIn(SymbolNeedAssign2, Type, i, cutslot,"ASSIGN "+ Er);
         }
     }
     break;
@@ -546,7 +591,7 @@ int HashTable::CheckTypeOfAssign(string &name)
         else
         {
             // Already check if input is true
-            return 3;
+            return 2;
         }
     }
     else
@@ -659,6 +704,7 @@ void HashTable::CALL(string name, string Er)
                         exit(1);
                     }
                 }
+                AssignTypeIn(SymbolNeedAssign2, isFuc, i, cutslot, Er);
             }
         }
     }
@@ -816,11 +862,13 @@ void SymbolTable::run(string filename)
                 throw Undeclared(line);
                 exit(1);
             }
-            BangBam.LOOK_UP(line, levelNow);
+            cout << BangBam.LOOK_UP(line, levelNow) << endl;
         }
         break;
         case 16:
         {
+            // PRINT
+            BangBam.PRINT(levelNow);
         }
         break;
         default:
