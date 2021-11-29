@@ -59,6 +59,40 @@ bool HashTable::InitType(Symbol *a)
     return true;
 }
 
+long long HashTable::HASH_CHOSE(long long k, int HashType)
+{
+    if(HashType == 0)
+    {
+        return HASH_LINEAR(k);
+    }
+    if(HashType == 1)
+    {
+        return HASH_DOUBLE1(k);
+    }
+    if(HashType == 2)
+    {
+        return HASH_QUADRATIC(k);
+    }
+    return -1;
+}
+
+long long HashTable::HASH_CHOSE_P(long long k, int i, int HashType)
+{
+    if(HashType == 0)
+    {
+        return HASH_LINEAR_P(k,i);
+    }
+    if(HashType == 1)
+    {
+        return HASH_DOUBLE_P(k,i);
+    }
+    if(HashType == 2)
+    {
+        return HASH_QUADRATIC_P(k,i);
+    }
+    return -1;
+};
+
 void HashTable::AssignTypeIn(Symbol *x, int Type, int i, string cuts, string Er)
 {
     if (Type == 0)
@@ -175,7 +209,7 @@ Symbol *HashTable::FindSymbol(string name)
     return NULL;
 }
 
-long long HashTable::LOOK_UP(string name, int level)
+long long HashTable::LOOK_UP(string name, int level, int HashType)
 {
     int i = 0;
     for (i = level; i >= 0; i--)
@@ -184,7 +218,8 @@ long long HashTable::LOOK_UP(string name, int level)
         {
             if (arr[j].level_of_block == i && arr[j].contain.Identifier == name)
             {
-                return HASH_LINEAR(arr[j].key);
+                //return HASH_CHOSE(arr[j].key, HashType);
+                return j;
             }
         }
     }
@@ -288,6 +323,7 @@ void HashTable::CheckErForFunc(Symbol *SymbolNeedAssign, Symbol *SymbolNeedAssig
                         exit(1);
                     }
                 }
+                AssignTypeIn(SymbolNeedAssign2, isFuc, i, cutslot,"ASSIGN "+ Er);
             }
         }
     }
@@ -344,7 +380,7 @@ int HashTable::CharCount(string String, char Char)
     }
 }
 
-void HashTable::ASSIGN(string name, string Er, string value)
+void HashTable::ASSIGN(string name, string Er, string value, int TypeHash)
 {
     Symbol *SymbolNeedAssign;
     SymbolNeedAssign = FindSymbol(name);
@@ -477,10 +513,11 @@ int HashTable::CheckTypeOfAssign(string &name)
     return 5;
 }
 
-void HashTable::INSERT(string name, string Er, int level, int nTypeIn)
+void HashTable::INSERT(string name, string Er,int TypeHash, int level, int nTypeIn)
 {
     Symbol *NewSymbol = new Symbol(name, nTypeIn, level);
-    int index_in_map = HASH_LINEAR(NewSymbol->key);
+    int index_in_map = HASH_CHOSE(NewSymbol->key, TypeHash);
+
 
     if (arr[index_in_map].key == 0)
     {
@@ -492,7 +529,7 @@ void HashTable::INSERT(string name, string Er, int level, int nTypeIn)
     {
         for (int i = 0; i < Size_of_HashTable; i++)
         {
-            index_in_map = HASH_LINEAR_P(NewSymbol->key, i);
+            index_in_map = HASH_CHOSE_P(NewSymbol->key, i, TypeHash);
             if (arr[index_in_map].key == 0)
             {
                 arr[index_in_map] = *NewSymbol;
@@ -502,7 +539,7 @@ void HashTable::INSERT(string name, string Er, int level, int nTypeIn)
             }
             if (arr[index_in_map] == *NewSymbol)
             {
-                throw Redeclared("INSERT " + Er);
+                throw Redeclared(Er);
                 exit(1);
             }
         }
@@ -629,7 +666,7 @@ void SymbolTable::run(string filename)
     string line, input;
 
     HashTable BangBam;
-    int levelNow = 0;
+    int levelNow = 0, TypeHash = -1;
 
     while (getline(file, line))
     {
@@ -641,6 +678,7 @@ void SymbolTable::run(string filename)
             // LINEAR
             line.erase(0, line.find(' ') + 1);
             BangBam.HASH_LINEAR_MAP(stol(line.substr(0, line.find(' '))), std::stol(line.substr(line.find(' ') + 1)));
+            TypeHash = 0;
             break;
         }
         case 1:
@@ -650,6 +688,7 @@ void SymbolTable::run(string filename)
             long long a = stol(line.substr(0, line.find(' ')));
             line.erase(0, line.find(' ') + 1);
             BangBam.HASH_QUADRATIC_MAP(a, stol(line.substr(0, line.find(' '))), stol(line.substr(line.find(' ') + 1)));
+            TypeHash = 2;
             break;
         }
         case 2:
@@ -657,6 +696,7 @@ void SymbolTable::run(string filename)
             // DOUBLE
             line.erase(0, line.find(' ') + 1);
             BangBam.HASH_DOUBLE_MAP(stol(line.substr(0, line.find(' '))), std::stol(line.substr(line.find(' ') + 1)));
+            TypeHash = 1;
             break;
         }
         case 10:
@@ -673,12 +713,12 @@ void SymbolTable::run(string filename)
             if (line.find(' ') == -1)
             {
                 // dang add string
-                BangBam.INSERT(line, line, levelNow);
+                BangBam.INSERT(line, line,TypeHash, levelNow);
             }
             else
             {
                 // dang ham
-                BangBam.INSERT(line.substr(0, line.find(' ')), line, levelNow, stol(line.substr(line.find(' ') + 1)));
+                BangBam.INSERT(line.substr(0, line.find(' ')), line,TypeHash ,levelNow, stol(line.substr(line.find(' ') + 1)));
             }
 
             break;
@@ -687,7 +727,7 @@ void SymbolTable::run(string filename)
         {
             // ASSIGN
             line.erase(0, line.find(' ') + 1);
-            BangBam.ASSIGN(line.substr(0, line.find(' ')), line, line.substr(line.find(' ') + 1));
+            BangBam.ASSIGN(line.substr(0, line.find(' ')), line, line.substr(line.find(' ') + 1), TypeHash);
             // temporary we print out 0, then we count number of hash to print
             break;
         }
@@ -725,7 +765,7 @@ void SymbolTable::run(string filename)
                 throw Undeclared(line);
                 exit(1);
             }
-            cout << BangBam.LOOK_UP(line, levelNow) << endl;
+            cout << BangBam.LOOK_UP(line, levelNow, TypeHash) << endl;
         }
         break;
         case 16:

@@ -61,15 +61,15 @@ public:
     int CheckType2(string cutslot);
     bool CheckStringNum(string value);
     int CheckTypeOfAssign(string &name);
-    void ASSIGN(string name, string Er, string value);
-    void INSERT(string name, string Er = "", int level = 0, int nTypeIn = 0);
+    void ASSIGN(string name, string Er, string value, int TypeHash);
+    void INSERT(string name, string Er = "",int TypeHash = 0,int level = 0, int nTypeIn = 0);
     void PRINT(int level);
     void CheckErForFunc(Symbol *SymbolNeedAssign, Symbol *SymbolNeedAssign2, string value, string name, string Er);
     void CheckErForVar(Symbol *SymbolNeedAssign, string value, string name, string Er);
     int CharCount(string String, char Char);
     Symbol *FindSymbol(string name);
     void DeleteSymbolLevel(string name, int level);
-    long long LOOK_UP(string name, int level);
+    long long LOOK_UP(string name, int level, int Hashtype);
     void CALL(string name, string Er);
 
     void HASH_LINEAR_MAP(int size, int c)
@@ -92,15 +92,15 @@ public:
         this->c2 = c2;
     }
     /////////////////////////
-    long long HASH_DOUBLE1(int k)
+    long long HASH_DOUBLE1(long long k)
     {
-        return k % c;
+        return k % this->Size_of_HashTable;
     }
-    long long HASH_DOUBLE2(int k)
+    long long HASH_DOUBLE2(long long k)
     {
         return 1 + (k % (this->Size_of_HashTable - 2));
     }
-    long long HASH_DOUBLE_P(int k, int i)
+    long long HASH_DOUBLE_P(long long k, int i)
     {
         return (HASH_DOUBLE1(k) + this->c * i * HASH_DOUBLE2(k)) % this->Size_of_HashTable;
     }
@@ -110,21 +110,23 @@ public:
     {
         return k % this->Size_of_HashTable;
     }
-
     long long HASH_LINEAR_P(long long k, int i)
     {
         return (HASH_LINEAR(k) + this->c * i) % this->Size_of_HashTable;
     }
     /////////////////////////
-    long long HASH_QUADRATIC(int k)
+    long long HASH_QUADRATIC(long long k)
     {
         return k % Size_of_HashTable;
     }
-    long long HASH_QUADRATIC(int k, int i)
+    long long HASH_QUADRATIC_P(long long k, int i)
     {
         return (HASH_QUADRATIC(k) + c * i + c2 * i * i) % Size_of_HashTable;
     }
     /////////////////////////
+    long long HASH_CHOSE(long long k, int HashType);
+    long long HASH_CHOSE_P(long long k, int i, int HashType);
+
     bool CheckStringName();
     string ReturnType(Symbol *a);
     void AssignTypeOut(Symbol *x, Symbol *a, string Er);
