@@ -300,7 +300,7 @@ void HashTable::CheckErForFunc(Symbol *SymbolNeedAssign, Symbol *SymbolNeedAssig
     if (SymbolNeedAssign2 != NULL)
     {
         // check behind
-        if (value.find('(') != -1)
+        if (value.find('(') !=string::npos)
         {
             value.erase(0, value.find('(') + 1);
             int n = CharCount(value, ',') + 1;
@@ -387,7 +387,7 @@ int HashTable::CharCount(string String, char Char)
     {
         int a = String.find(Char);
         String.erase(0, a + 1);
-        if (a == -1)
+        if (a == string::npos)
         {
             return count;
         }
@@ -489,8 +489,8 @@ bool HashTable::CheckStringNum(string value)
 
 int HashTable::CheckTypeOfAssign(string &name)
 {
-    int a = name.find('('), b = name.find(')');
-    if (a != -1)
+    unsigned int a = name.find('(');
+    if (a != string::npos)
     {
         // sum(5,x) undefined
         // foo(’abc’) define
@@ -518,7 +518,7 @@ int HashTable::CheckTypeOfAssign(string &name)
         }
         else
         {
-            if (name.find('\'') == -1)
+            if (name.find('\'') == string::npos)
             {
                 return 4;
             }
@@ -558,12 +558,13 @@ void HashTable::INSERT(string name, string Er, int TypeHash, int level, int nTyp
                 exit(1);
             }
         }
+        throw Overflow(Er);
     }
 }
 
 void HashTable::CALL(string name, string Er)
 {
-    if (name.find('(') == -1 || name.find(')') == -1)
+    if (name.find('(') == string::npos || name.find(')') == string::npos)
     {
         throw InvalidInstruction(Er);
         exit(1);
@@ -581,7 +582,7 @@ void HashTable::CALL(string name, string Er)
     if (SymbolNeedAssign2 != NULL)
     {
         // check behind
-        if (name.find('(') != -1)
+        if (name.find('(') != string::npos)
         {
             name.erase(0, name.find('(') + 1);
             int n = CharCount(name, ',') + 1;
@@ -723,13 +724,13 @@ void SymbolTable::run(string filename)
             // INSERT
             line.erase(0, line.find(' ') + 1);
 
-            if (levelNow != 0 && line.find(' ') != -1)
+            if (levelNow != 0 && line.find(' ') != string::npos)
             {
                 throw InvalidDeclaration(line.substr(0, line.find(' ')));
                 exit(1);
             }
 
-            if (line.find(' ') == -1)
+            if (line.find(' ') == string::npos)
             {
                 // dang add string
                 BangBam.INSERT(line, line, TypeHash, levelNow);
