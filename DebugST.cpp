@@ -4,7 +4,7 @@ class Contain
 {
 public:
     string Identifier;
-    string TypeIn[20];
+    string *TypeIn = new string[20];
     string TypeOut;
     string Value;
     int slot = 0;
@@ -34,7 +34,7 @@ public:
     {
         string Res = "";
         Res += to_string(Name->level_of_block);
-        for (int i = 0; i < Name->contain.Identifier.length(); i++)
+        for (int unsigned i = 0; i < Name->contain.Identifier.length(); i++)
         {
             Res += to_string(Name->contain.Identifier[i] - 48);
         }
@@ -50,7 +50,7 @@ public:
 class HashTable
 {
 public:
-    Symbol *arr;
+    Symbol *Allsymbol;
     int Size_of_HashTable;
     int c, c2;
 
@@ -73,19 +73,19 @@ public:
     void HASH_LINEAR_MAP(int size, int c)
     { // find
         Size_of_HashTable = size;
-        arr = new Symbol[size];
+        Allsymbol = new Symbol[size];
         this->c = c;
     }
     void HASH_DOUBLE_MAP(int size, int c)
     {
         Size_of_HashTable = size;
-        arr = new Symbol[size];
+        Allsymbol = new Symbol[size];
         this->c = c;
     }
     void HASH_QUADRATIC_MAP(int size, int c, int c2)
     {
         Size_of_HashTable = size;
-        arr = new Symbol[size];
+        Allsymbol = new Symbol[size];
         this->c = c;
         this->c2 = c2;
     }
@@ -144,9 +144,9 @@ void Contain::AddContain(string identifier, int nTypeIn, string typeout, string 
     this->Identifier = identifier;
     this->TypeOut = "Undefined";
     this->Value = value;
-    for (auto &x : TypeIn)
+    for (int i = 0; i<20 ;i++)
     {
-        x = "Undefined";
+        TypeIn[i] = "Undefined";
     };
     this->nTypeIn = nTypeIn;
 }
@@ -161,9 +161,9 @@ bool Symbol::operator==(Symbol &Sec)
 Symbol::Symbol(string name, int nTypeIn, int level)
 {
     this->contain.Identifier = name;
-    for (auto &x : this->contain.TypeIn)
+    for (int i =0; i<20 ; i++)
     {
-        x = "Undefined";
+        this->contain.TypeIn[i] = "Undefined";
     }
     this->level_of_block = level;
     this->key = HASH_NAME(this);
@@ -279,10 +279,10 @@ void HashTable::PRINT(int level)
 
     for (int j = 0; j < Size_of_HashTable; j++)
     {
-        if (arr[j].contain.Identifier != "")
+        if (Allsymbol[j].contain.Identifier != "")
         {
 
-            Res = Res + to_string(j) + " " + arr[j].contain.Identifier + "//" + to_string(arr[j].level_of_block) + ";";
+            Res = Res + to_string(j) + " " + Allsymbol[j].contain.Identifier + "//" + to_string(Allsymbol[j].level_of_block) + ";";
         }
     }
 
@@ -339,9 +339,9 @@ Symbol *HashTable::FindSymbol(string name)
 
     for (int i = 0; i < Size_of_HashTable; i++)
     {
-        if (arr[i].GetName() == name)
+        if (Allsymbol[i].GetName() == name)
         {
-            return &arr[i];
+            return &Allsymbol[i];
         }
     }
 
@@ -355,7 +355,7 @@ long long HashTable::LOOK_UP(string name, int level, int HashType)
     {
         for (int j = 0; j < Size_of_HashTable; j++)
         {
-            if (arr[j].level_of_block == i && arr[j].contain.Identifier == name)
+            if (Allsymbol[j].level_of_block == i && Allsymbol[j].contain.Identifier == name)
             {
                 // return HASH_CHOSE(arr[j].key, HashType);
                 return j;
@@ -371,9 +371,9 @@ void HashTable::DeleteSymbolLevel(string Er, int level)
     Symbol a;
     for (int i = 0; i < Size_of_HashTable; i++)
     {
-        if (this->arr[i].level_of_block == level)
+        if (this->Allsymbol[i].level_of_block == level)
         {
-            arr[i] = a;
+            Allsymbol[i] = a;
         }
     }
 
@@ -524,7 +524,7 @@ int HashTable::CharCount(string String, char Char)
     int count = 0;
     while (true)
     {
-        int a = String.find(Char);
+        int unsigned a = String.find(Char);
         String.erase(0, a + 1);
         if (a == string::npos)
         {
@@ -673,9 +673,9 @@ void HashTable::INSERT(string name, string Er, int TypeHash, int level, int nTyp
     Symbol *NewSymbol = new Symbol(name, nTypeIn, level);
     int index_in_map = HASH_CHOSE(NewSymbol->key, TypeHash);
 
-    if (arr[index_in_map].key == 0)
+    if (Allsymbol[index_in_map].key == 0)
     {
-        arr[index_in_map] = *NewSymbol;
+        Allsymbol[index_in_map] = *NewSymbol;
         cout << 0 << endl;
         return;
     }
@@ -684,14 +684,14 @@ void HashTable::INSERT(string name, string Er, int TypeHash, int level, int nTyp
         for (int i = 0; i < Size_of_HashTable; i++)
         {
             index_in_map = HASH_CHOSE_P(NewSymbol->key, i, TypeHash);
-            if (arr[index_in_map].key == 0)
+            if (Allsymbol[index_in_map].key == 0)
             {
-                arr[index_in_map] = *NewSymbol;
+                Allsymbol[index_in_map] = *NewSymbol;
                 cout << i << endl;
-                arr[index_in_map].contain.slot = i;
+                Allsymbol[index_in_map].contain.slot = i;
                 return;
             }
-            if (arr[index_in_map] == *NewSymbol)
+            if (Allsymbol[index_in_map] == *NewSymbol)
             {
                 throw Redeclared(Er);
                 exit(1);

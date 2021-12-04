@@ -6,7 +6,7 @@ class Contain
 {
 public:
     string Identifier;
-    string TypeIn[20];
+    string *TypeIn = new string[20];
     string TypeOut;
     string Value;
     int slot = 0;
@@ -36,7 +36,7 @@ public:
     {
         string Res = "";
         Res += to_string(Name->level_of_block);
-        for (int i = 0; i < Name->contain.Identifier.length(); i++)
+        for (int unsigned i = 0; i < Name->contain.Identifier.length(); i++)
         {
             Res += to_string(Name->contain.Identifier[i] - 48);
         }
@@ -52,7 +52,7 @@ public:
 class HashTable
 {
 public:
-    Symbol *arr;
+    Symbol *Allsymbol;
     int Size_of_HashTable;
     int c, c2;
 
@@ -75,19 +75,19 @@ public:
     void HASH_LINEAR_MAP(int size, int c)
     { // find
         Size_of_HashTable = size;
-        arr = new Symbol[size];
+        Allsymbol = new Symbol[size];
         this->c = c;
     }
     void HASH_DOUBLE_MAP(int size, int c)
     {
         Size_of_HashTable = size;
-        arr = new Symbol[size];
+        Allsymbol = new Symbol[size];
         this->c = c;
     }
     void HASH_QUADRATIC_MAP(int size, int c, int c2)
     {
         Size_of_HashTable = size;
-        arr = new Symbol[size];
+        Allsymbol = new Symbol[size];
         this->c = c;
         this->c2 = c2;
     }

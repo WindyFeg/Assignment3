@@ -92,7 +92,7 @@ public:
 class HashTable
 {
 public:
-    Symbol *arr;
+    Symbol *Allsymbol;
     int Size_of_HashTable;
     int c, c2;
 
@@ -225,9 +225,9 @@ public:
         Symbol *NewSymbol = new Symbol(name, nTypeIn);
         int index_in_map = HASH_LINEAR(NewSymbol->key);
 
-        if (arr[index_in_map].key == 0)
+        if (Allsymbol[index_in_map].key == 0)
         {
-            arr[index_in_map] = *NewSymbol;
+            Allsymbol[index_in_map] = *NewSymbol;
             cout << 0 << endl;
             return;
         }
@@ -236,13 +236,13 @@ public:
             for (int i = 0; i < Size_of_HashTable; i++)
             {
                 index_in_map = HASH_LINEAR_P(NewSymbol->key, i);
-                if (arr[index_in_map].key == 0)
+                if (Allsymbol[index_in_map].key == 0)
                 {
-                    arr[index_in_map] = *NewSymbol;
+                    Allsymbol[index_in_map] = *NewSymbol;
                     cout << i << endl;
                     return;
                 }
-                if (arr[index_in_map] == *NewSymbol)
+                if (Allsymbol[index_in_map] == *NewSymbol)
                 {
                     cout << "Redeclared";
                     exit(1);
@@ -254,7 +254,7 @@ public:
     void HASH_LINEAR_MAP(int size, int c)
     { // find
         Size_of_HashTable = size;
-        arr = new Symbol[size];
+        Allsymbol = new Symbol[size];
         this->c = c;
     }
     /////////////////////////
@@ -318,9 +318,9 @@ public:
 
         for (int i = 0; i < Size_of_HashTable; i++)
         {
-            if (arr[i].GetName() == name)
+            if (Allsymbol[i].GetName() == name)
             {
-                return &arr[i];
+                return &Allsymbol[i];
             }
         }
 
