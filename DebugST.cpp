@@ -4,7 +4,7 @@ class Contain
 {
 public:
     string Identifier;
-    string *TypeIn = new string[20];
+    string *TypeIn;
     string TypeOut;
     string Value;
     int slot = 0;
@@ -70,26 +70,25 @@ public:
     long long LOOK_UP(string name, int level, int Hashtype);
     void CALL(string name, string Er);
 
-    void HASH_LINEAR_MAP(int size, int c)
-    { // find
+    void HASH_LINEAR_M(int size, int c)
+    { 
         Size_of_HashTable = size;
         Allsymbol = new Symbol[size];
         this->c = c;
     }
-    void HASH_DOUBLE_MAP(int size, int c)
+    void HASH_DOUBLE_M(int size, int c)
     {
         Size_of_HashTable = size;
         Allsymbol = new Symbol[size];
         this->c = c;
     }
-    void HASH_QUADRATIC_MAP(int size, int c, int c2)
+    void HASH_QUADRATIC_M(int size, int c, int c2)
     {
         Size_of_HashTable = size;
         Allsymbol = new Symbol[size];
         this->c = c;
         this->c2 = c2;
     }
-    /////////////////////////
     long long HASH_DOUBLE1(long long k)
     {
         return k % this->Size_of_HashTable;
@@ -102,8 +101,6 @@ public:
     {
         return (HASH_DOUBLE1(k) + this->c * i * HASH_DOUBLE2(k)) % this->Size_of_HashTable;
     }
-    ////////////////////////
-
     long long HASH_LINEAR(long long k)
     {
         return k % this->Size_of_HashTable;
@@ -112,7 +109,6 @@ public:
     {
         return (HASH_LINEAR(k) + this->c * i) % this->Size_of_HashTable;
     }
-    /////////////////////////
     long long HASH_QUADRATIC(long long k)
     {
         return k % Size_of_HashTable;
@@ -121,7 +117,6 @@ public:
     {
         return (HASH_QUADRATIC(k) + c * i + c2 * i * i) % Size_of_HashTable;
     }
-    /////////////////////////
     long long HASH_CHOSE(long long k, int HashType);
     long long HASH_CHOSE_P(long long k, int i, int HashType);
 
@@ -144,7 +139,8 @@ void Contain::AddContain(string identifier, int nTypeIn, string typeout, string 
     this->Identifier = identifier;
     this->TypeOut = "Undefined";
     this->Value = value;
-    for (int i = 0; i<20 ;i++)
+    this->TypeIn = new string[nTypeIn];
+    for (int i = 0; i<nTypeIn ;i++)
     {
         TypeIn[i] = "Undefined";
     };
@@ -161,7 +157,8 @@ bool Symbol::operator==(Symbol &Sec)
 Symbol::Symbol(string name, int nTypeIn, int level)
 {
     this->contain.Identifier = name;
-    for (int i =0; i<20 ; i++)
+    this->contain.TypeIn = new string[nTypeIn];
+    for (int i =0; i<nTypeIn ; i++)
     {
         this->contain.TypeIn[i] = "Undefined";
     }
@@ -169,12 +166,6 @@ Symbol::Symbol(string name, int nTypeIn, int level)
     this->key = HASH_NAME(this);
     this->contain.nTypeIn = nTypeIn;
 }
-// Symbol::Symbol(string name, int level, int key)
-// {
-//     this->contain.Identifier = name;
-//     this->key = key;
-//     this->level_of_block;
-// }
 
 string Symbol::GetName()
 {
@@ -299,19 +290,16 @@ void HashTable::AssignTypeOut(Symbol *x, Symbol *a, string Er)
 {
     if (!InitType(x))
     {
-        // x = non a = non
         if (!InitType(a))
         {
             throw TypeCannotBeInferred("ASSIGN " + Er);
             exit(1);
         }
-        // if x(non) = a(int)
         x->contain.TypeOut = a->contain.TypeOut;
         return;
     }
     else
     {
-        // x = int
         if (!InitType(a))
         {
             a->contain.TypeOut = x->contain.TypeOut;
@@ -319,7 +307,6 @@ void HashTable::AssignTypeOut(Symbol *x, Symbol *a, string Er)
         }
         else
         {
-            // if x(int) = a(int or string)
             if (x->contain.TypeOut == a->contain.TypeOut)
             {
                 return;
@@ -335,7 +322,6 @@ void HashTable::AssignTypeOut(Symbol *x, Symbol *a, string Er)
 
 Symbol *HashTable::FindSymbol(string name)
 {
-    // defaut level is 0 =>
 
     for (int i = 0; i < Size_of_HashTable; i++)
     {
@@ -357,7 +343,6 @@ long long HashTable::LOOK_UP(string name, int level, int HashType)
         {
             if (Allsymbol[j].level_of_block == i && Allsymbol[j].contain.Identifier == name)
             {
-                // return HASH_CHOSE(arr[j].key, HashType);
                 return j;
             }
         }
@@ -367,7 +352,6 @@ long long HashTable::LOOK_UP(string name, int level, int HashType)
 
 void HashTable::DeleteSymbolLevel(string Er, int level)
 {
-    // defaut level is 0 =>
     Symbol a;
     for (int i = 0; i < Size_of_HashTable; i++)
     {
@@ -387,7 +371,6 @@ string HashTable::ReturnType(Symbol *a)
 
 void HashTable::CheckStringName(string name,string Er)
 {
-    // Ki tu dau chu normal, con lai (chu normal, in hoa, _, so)
     if('A' <=name[0] && name[0]<= 'Z' )
     {
         throw InvalidInstruction(Er);
@@ -408,7 +391,7 @@ void HashTable::CheckStringName(string name,string Er)
 
 void HashTable::CheckErForVar(Symbol *SymbolNeedAssign, string value, string name, string Er)
 {
-    int type = CheckType2(value); // 0 1 2 3 ok 5
+    int type = CheckType2(value);
     if (type == 5)
     {
         throw Undeclared(value);
@@ -438,7 +421,6 @@ void HashTable::CheckErForFunc(Symbol *SymbolNeedAssign, Symbol *SymbolNeedAssig
     }
     if (SymbolNeedAssign2 != NULL)
     {
-        // check behind
         if (value.find('(') !=string::npos)
         {
             value.erase(0, value.find('(') + 1);
@@ -452,13 +434,13 @@ void HashTable::CheckErForFunc(Symbol *SymbolNeedAssign, Symbol *SymbolNeedAssig
 
             for (int i = 0; i < n; i++)
             {
-                string cutslot = value.substr(0, value.find(',')); // 1
+                string cutslot = value.substr(0, value.find(','));
                 value.erase(0, value.find(',') + 1);
                 if (i + 1 == n)
                 {
                     cutslot.pop_back();
                 }
-                int isFuc = CheckType2(cutslot); // 0 1 int string
+                int isFuc = CheckType2(cutslot); 
                 if (isFuc == 2)
                 {
                     throw TypeMismatch("ASSIGN " + Er);
@@ -492,15 +474,13 @@ void HashTable::CheckErForFunc(Symbol *SymbolNeedAssign, Symbol *SymbolNeedAssig
         exit(1);
     }
 
-    AssignTypeOut(SymbolNeedAssign, SymbolNeedAssign2, Er); // Infer
-    // check front
+    AssignTypeOut(SymbolNeedAssign, SymbolNeedAssign2, Er);
 }
 
 int HashTable::CheckType2(string cutslot)
 {
     if (FindSymbol(cutslot) == NULL)
     {
-        // string or int
         if (CheckTypeOfAssign(cutslot) == 0)
         {
             return 0;
@@ -513,9 +493,9 @@ int HashTable::CheckType2(string cutslot)
             return 5;
     }
     if (FindSymbol(cutslot)->contain.nTypeIn == 0)
-        return 4; // a
+        return 4; 
     if (FindSymbol(cutslot)->contain.nTypeIn > 0)
-        return 2; // fuction
+        return 2; 
     return 5;
 }
 
@@ -539,17 +519,11 @@ void HashTable::ASSIGN(string name, string Er, string value, int TypeHash)
     Symbol *SymbolNeedAssign;
     SymbolNeedAssign = FindSymbol(name);
 
-    // 0 is Assign number ASSIGN x 3
-    // 1 is Assign string '' ASSIGN x 'ed'
-    // 2 is Assign Function haven't type yet ASSIGN x Fun(12,x, 'alo')
-    // 3 is Assign Fuction have type ASSIGN x Fun(12,x, 'alo')
-    // 4 is Assign Variable has it value x = a (a = 5)
     int typeAssign = CheckTypeOfAssign(value);
     switch (typeAssign)
     {
     case 0:
     {
-        // x(maybe) = 2
         CheckErForVar(SymbolNeedAssign, value, name, Er);
         SymbolNeedAssign->contain.TypeOut = "Number";
         SymbolNeedAssign->contain.Value = value;
@@ -557,7 +531,6 @@ void HashTable::ASSIGN(string name, string Er, string value, int TypeHash)
     break;
     case 1:
     {
-        // x(maybe) = 'abc' (but a is int??)
         CheckErForVar(SymbolNeedAssign, value, name, Er);
         SymbolNeedAssign->contain.TypeOut = "String";
         SymbolNeedAssign->contain.Value = value;
@@ -565,27 +538,23 @@ void HashTable::ASSIGN(string name, string Er, string value, int TypeHash)
     break;
     case 2:
     {
-        Symbol *SymbolNeedAssign2; // fun
+        Symbol *SymbolNeedAssign2; 
         SymbolNeedAssign2 = FindSymbol(value.substr(0, value.find('(')));
-        // Assign x(type = a) = a;
 
         CheckErForFunc(SymbolNeedAssign, SymbolNeedAssign2, value, name, Er);
 
-        // Check fun(1,2,3)
-        value.erase(0, value.find('(') + 1); // 1,a,'b')
+        value.erase(0, value.find('(') + 1);
 
-        int n = CharCount(value, ',') + 1; // 2
-        // check cut each slot 1,a,'b') to store in array
+        int n = CharCount(value, ',') + 1;
         for (int i = 0; i < n; i++)
         {
-            string cutslot = value.substr(0, value.find(',')); // 1
+            string cutslot = value.substr(0, value.find(','));
             value.erase(0, value.find(',') + 1);
             if (i + 1 == n)
             {
                 cutslot.pop_back();
             }
             int Type = CheckTypeOfAssign(cutslot);
-            // check each slot is what type??
             AssignTypeIn(SymbolNeedAssign2, Type, i, cutslot, "ASSIGN " + Er);
         }
     }
@@ -598,7 +567,6 @@ void HashTable::ASSIGN(string name, string Er, string value, int TypeHash)
     {
         Symbol *SymbolNeedAssign2;
         SymbolNeedAssign2 = FindSymbol(value);
-        // x(maybe) = a(co type)
         CheckErForVar(SymbolNeedAssign, value, name, Er);
 
         AssignTypeOut(SymbolNeedAssign, SymbolNeedAssign2, Er);
@@ -631,26 +599,22 @@ int HashTable::CheckTypeOfAssign(string &name)
     unsigned int a = name.find('(');
     if (a != string::npos)
     {
-        // sum(5,x) undefined
-        // foo(’abc’) define
+        
         Symbol *SymbolNeedAssign;
         SymbolNeedAssign = FindSymbol(name.substr(0, a));
 
         if (SymbolNeedAssign->contain.TypeIn[0] == "Undefined")
         {
-            // Undefined
             return 2;
         }
         else
         {
-            // Already check if input is true
             return 2;
         }
     }
     else
     {
-        // 'abcd'
-        // 1234
+       
         if (CheckStringNum(name))
         {
             return 0;
@@ -671,11 +635,11 @@ void HashTable::INSERT(string name, string Er, int TypeHash, int level, int nTyp
 {
     CheckStringName(name,Er);
     Symbol *NewSymbol = new Symbol(name, nTypeIn, level);
-    int index_in_map = HASH_CHOSE(NewSymbol->key, TypeHash);
+    int index_in_m = HASH_CHOSE(NewSymbol->key, TypeHash);
 
-    if (Allsymbol[index_in_map].key == 0)
+    if (Allsymbol[index_in_m].key == 0)
     {
-        Allsymbol[index_in_map] = *NewSymbol;
+        Allsymbol[index_in_m] = *NewSymbol;
         cout << 0 << endl;
         return;
     }
@@ -683,15 +647,15 @@ void HashTable::INSERT(string name, string Er, int TypeHash, int level, int nTyp
     {
         for (int i = 0; i < Size_of_HashTable; i++)
         {
-            index_in_map = HASH_CHOSE_P(NewSymbol->key, i, TypeHash);
-            if (Allsymbol[index_in_map].key == 0)
+            index_in_m = HASH_CHOSE_P(NewSymbol->key, i, TypeHash);
+            if (Allsymbol[index_in_m].key == 0)
             {
-                Allsymbol[index_in_map] = *NewSymbol;
+                Allsymbol[index_in_m] = *NewSymbol;
                 cout << i << endl;
-                Allsymbol[index_in_map].contain.slot = i;
+                Allsymbol[index_in_m].contain.slot = i;
                 return;
             }
-            if (Allsymbol[index_in_map] == *NewSymbol)
+            if (Allsymbol[index_in_m] == *NewSymbol)
             {
                 throw Redeclared(Er);
                 exit(1);
@@ -709,9 +673,8 @@ void HashTable::CALL(string name, string Er)
         exit(1);
     }
 
-    Symbol *SymbolNeedAssign2; // fun
+    Symbol *SymbolNeedAssign2; 
     SymbolNeedAssign2 = FindSymbol(name.substr(0, name.find('(')));
-    // Assign x(type = a) = a;
 
     if (SymbolNeedAssign2 == NULL)
     {
@@ -720,7 +683,6 @@ void HashTable::CALL(string name, string Er)
     }
     if (SymbolNeedAssign2 != NULL)
     {
-        // check behind
         if (name.find('(') != string::npos)
         {
             name.erase(0, name.find('(') + 1);
@@ -734,13 +696,13 @@ void HashTable::CALL(string name, string Er)
 
             for (int i = 0; i < n; i++)
             {
-                string cutslot = name.substr(0, name.find(',')); // 1
+                string cutslot = name.substr(0, name.find(','));
                 name.erase(0, name.find(',') + 1);
                 if (i + 1 == n)
                 {
                     cutslot.pop_back();
                 }
-                int isFuc = CheckType2(cutslot); // 0 1 int string
+                int isFuc = CheckType2(cutslot);
                 if (isFuc == 2)
                 {
                     throw TypeMismatch(Er);
@@ -834,33 +796,29 @@ void SymbolTable::run(string filename)
         {
         case 0:
         {
-            // LINEAR
             line.erase(0, line.find(' ') + 1);
-            BangBam.HASH_LINEAR_MAP(stol(line.substr(0, line.find(' '))), std::stol(line.substr(line.find(' ') + 1)));
+            BangBam.HASH_LINEAR_M(stol(line.substr(0, line.find(' '))), std::stol(line.substr(line.find(' ') + 1)));
             TypeHash = 0;
             break;
         }
         case 1:
         {
-            // QUADRATIC
             line.erase(0, line.find(' ') + 1);
             long long a = stol(line.substr(0, line.find(' ')));
             line.erase(0, line.find(' ') + 1);
-            BangBam.HASH_QUADRATIC_MAP(a, stol(line.substr(0, line.find(' '))), stol(line.substr(line.find(' ') + 1)));
+            BangBam.HASH_QUADRATIC_M(a, stol(line.substr(0, line.find(' '))), stol(line.substr(line.find(' ') + 1)));
             TypeHash = 2;
             break;
         }
         case 2:
         {
-            // DOUBLE
             line.erase(0, line.find(' ') + 1);
-            BangBam.HASH_DOUBLE_MAP(stol(line.substr(0, line.find(' '))), std::stol(line.substr(line.find(' ') + 1)));
+            BangBam.HASH_DOUBLE_M(stol(line.substr(0, line.find(' '))), std::stol(line.substr(line.find(' ') + 1)));
             TypeHash = 1;
             break;
         }
         case 10:
         {
-            // INSERT
             line.erase(0, line.find(' ') + 1);
 
             if (levelNow != 0 && line.find(' ') != string::npos)
@@ -871,12 +829,10 @@ void SymbolTable::run(string filename)
 
             if (line.find(' ') == string::npos)
             {
-                // dang add string
                 BangBam.INSERT(line, line, TypeHash, levelNow);
             }
             else
             {
-                // dang ham
                 BangBam.INSERT(line.substr(0, line.find(' ')), line, TypeHash, levelNow, stol(line.substr(line.find(' ') + 1)));
             }
 
@@ -884,28 +840,25 @@ void SymbolTable::run(string filename)
         }
         case 11:
         {
-            // ASSIGN
             line.erase(0, line.find(' ') + 1);
             BangBam.ASSIGN(line.substr(0, line.find(' ')), line, line.substr(line.find(' ') + 1), TypeHash);
-            // temporary we print out 0, then we count number of hash to print
+          
             break;
         }
         case 12:
         {
-            // Call
-            // Undeclared, TypeMismatch, TypeCannotBeInferred.
-            //  (0 1 3)
+          
             line.erase(0, line.find(' ') + 1);
             BangBam.CALL(line, "CALL " + line);
 
             break;
         }
-        case 13: // begin
+        case 13: 
         {
             levelNow++;
         }
         break;
-        case 14: // end
+        case 14: 
         {
             levelNow--;
             if (levelNow < 0)
@@ -917,7 +870,7 @@ void SymbolTable::run(string filename)
         }
         break;
         case 15:
-        { // LOOKUP
+        { 
             line.erase(0, line.find(' ') + 1);
             if (BangBam.FindSymbol(line) == NULL)
             {
@@ -929,7 +882,7 @@ void SymbolTable::run(string filename)
         break;
         case 16:
         {
-            // PRINT
+            
             BangBam.PRINT(levelNow);
         }
         break;

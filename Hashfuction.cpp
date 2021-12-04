@@ -251,7 +251,7 @@ public:
         }
     }
 
-    void HASH_LINEAR_MAP(int size, int c)
+    void HASH_LINEAR_M(int size, int c)
     { // find
         Size_of_HashTable = size;
         Allsymbol = new Symbol[size];
@@ -398,7 +398,7 @@ public:
 int main()
 {
     HashTable BangBam;
-    BangBam.HASH_LINEAR_MAP(19, 1);
+    BangBam.HASH_LINEAR_M(19, 1);
     BangBam.INSERT("x");
     BangBam.INSERT("sum", 2);
     BangBam.ASSIGN("x", "1");
