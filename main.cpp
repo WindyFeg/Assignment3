@@ -27,7 +27,7 @@ void validSubmittedFiles(string filename, string *allowedIncludingFiles, int num
             for (int i = 0; i < numOfAllowedIncludingFiles; i++)
             {
                 if (line.find(allowedIncludingFiles[i]) != string::npos)
-                    continue;
+                continue;
                 cout << "Use disallowed file: " + line << endl;
                 exit(1);
             }

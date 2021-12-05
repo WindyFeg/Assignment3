@@ -6,10 +6,10 @@ class Contain
 {
 public:
     string Identifier;
+    string *TypeIn;
     string TypeOut;
     string Value;
     int slot = 0;
-    string *TypeIn;
 
     int nTypeIn;
     Contain() : Identifier(""), TypeOut("Undefined"), Value(""), nTypeIn(0) {}
@@ -32,7 +32,16 @@ public:
     ~Symbol(){};
 
     friend class HashTable;
-    
+    friend long long HASH_NAME(Symbol *Name)
+    {
+        string Res = "";
+        Res += to_string(Name->level_of_block);
+        for (int unsigned i = 0; i < Name->contain.Identifier.length(); i++)
+        {
+            Res += to_string(Name->contain.Identifier[i] - 48);
+        }
+        return stoll(Res);
+    }
 
     string GetName();
     int GetLevel();
@@ -43,38 +52,43 @@ public:
 class HashTable
 {
 public:
+    Symbol *Allsymbol;
     int Size_of_HashTable;
     int c, c2;
 
     HashTable() : Size_of_HashTable(0), c(0), c2(0) {}
 
-    int CheckType2(string cutslot);
+    int CheckType2(string cutslot, int level, int Hashtype);
     bool CheckStringNum(string value);
-    int CheckTypeOfAssign(string &name);
-    void ASSIGN(string name, string Er, string value, int TypeHash);
+    int CheckTypeOfAssign(string &name, int level, int Hashtype, Symbol* &SymbolNeedAssign2);
+    void ASSIGN(string name, string Er, string value, int TypeHash, int level);
     void INSERT(string name, string Er = "", int TypeHash = 0, int level = 0, int nTypeIn = 0);
     void PRINT(int level);
-    void CheckErForFunc(Symbol *SymbolNeedAssign, Symbol *SymbolNeedAssign2, string value, string name, string Er);
-    void CheckErForVar(Symbol *SymbolNeedAssign, string value, string name, string Er);
+    void CheckErForFunc(Symbol *SymbolNeedAssign, Symbol *SymbolNeedAssign2, string value, string name, string Er, int level, int HashType);
+    void CheckErForVar(Symbol *SymbolNeedAssign, string value, string name, string Er, int level, int hashtype);
     int CharCount(string String, char Char);
+    Symbol *FindSymbolWithLevel(string name, int level, int Typehash);
     Symbol *FindSymbol(string name);
     void DeleteSymbolLevel(string name, int level);
     long long LOOK_UP(string name, int level, int Hashtype);
-    void CALL(string name, string Er);
+    void CALL(string name, string Er, int level, int TypeHash);
 
     void HASH_LINEAR_M(int size, int c)
     { 
         Size_of_HashTable = size;
+        Allsymbol = new Symbol[size];
         this->c = c;
     }
     void HASH_DOUBLE_M(int size, int c)
     {
         Size_of_HashTable = size;
+        Allsymbol = new Symbol[size];
         this->c = c;
     }
     void HASH_QUADRATIC_M(int size, int c, int c2)
     {
         Size_of_HashTable = size;
+        Allsymbol = new Symbol[size];
         this->c = c;
         this->c2 = c2;
     }
@@ -90,7 +104,6 @@ public:
     {
         return (HASH_DOUBLE1(k) + this->c * i * HASH_DOUBLE2(k)) % this->Size_of_HashTable;
     }
-
     long long HASH_LINEAR(long long k)
     {
         return k % this->Size_of_HashTable;
